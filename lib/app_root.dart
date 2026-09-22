@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:product_app/screens/add_product.dart';
 import 'package:product_app/screens/catalog.dart';
 import 'package:product_app/screens/favorite.dart';
+import 'package:product_app/widgets/app_bar.dart';
+import 'package:product_app/utils/has_fab.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/catalog_provider.dart';
@@ -26,36 +27,16 @@ class _AppRootState extends State<AppRoot> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final favoriteCount = catalog.favoriteIds.length;
+    final screen = screens[currentIndex];
+    final fabScreen = screen is HasFloatingActionButton
+        ? screen as HasFloatingActionButton
+        : null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(titles[currentIndex]),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Row(
-              children: [
-                const Icon(Icons.favorite, color: Colors.indigo),
-                const SizedBox(width: 4),
-                Text('$favoriteCount'),
-              ],
-            ),
-          ),
-        ],
-      ),
-      body: screens[currentIndex],
-      floatingActionButton: currentIndex == 0
-          ? FloatingActionButton(
-              shape: const CircleBorder(),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AddProductScreen()),
-              ),
-              child: const Icon(Icons.add),
-            )
-          : null,
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.centerDocked,
+      appBar: CustomAppBar(title: titles[currentIndex]),
+      body: screen,
+      floatingActionButton: fabScreen?.buildFloatingActionButton(context),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
         onDestinationSelected: (i) => setState(() => currentIndex = i),
