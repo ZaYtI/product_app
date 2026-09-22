@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:product_app/models/product.dart';
+import 'package:product_app/screens/product_detail.dart';
 import 'package:product_app/widgets/product_card.dart';
 
 class ProductListSection extends StatefulWidget {
@@ -173,7 +174,14 @@ class _ProductListSectionState extends State<ProductListSection> {
                             widget.onToggleFavorite(product.id),
                         isSelectionMode: isSelectionMode,
                         isSelected: selectedIds.contains(product.id),
-                        onTap: () => _toggleSelected(product.id),
+                        onTap: isSelectionMode
+                            ? () => _toggleSelected(product.id)
+                            : () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      ProductDetailScreen(product: product),
+                                ),
+                              ),
                       ),
                     );
                   },

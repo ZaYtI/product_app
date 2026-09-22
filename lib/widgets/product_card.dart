@@ -33,7 +33,7 @@ class ProductCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: isSelectionMode ? onTap : null,
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -43,21 +43,30 @@ class ProductCard extends StatelessWidget {
                 children: [
                   if (isSelectionMode) ...[
                     Icon(
-                      isSelected
-                          ? Icons.check_circle
-                          : Icons.circle_outlined,
+                      isSelected ? Icons.check_circle : Icons.circle_outlined,
                       color: isSelected ? Colors.indigo : Colors.grey,
                     ),
                     const SizedBox(width: 12),
                   ],
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.indigo.shade50,
+                  if (product.image != null)
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(8),
+                      child: Image.memory(
+                        product.image!,
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(product.icon, color: Colors.indigo),
                     ),
-                    child: Icon(product.icon, color: Colors.indigo),
-                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(

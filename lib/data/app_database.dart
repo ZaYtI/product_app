@@ -14,7 +14,7 @@ Future<Database> _openDatabase() async {
 
   return openDatabase(
     path,
-    version: 1,
+    version: 2,
     onCreate: (db, version) async {
       await db.execute('''
         CREATE TABLE products (
@@ -22,7 +22,8 @@ Future<Database> _openDatabase() async {
           name TEXT NOT NULL,
           price REAL NOT NULL,
           description TEXT NOT NULL,
-          icon_code_point INTEGER NOT NULL
+          icon_code_point INTEGER NOT NULL,
+          image BLOB
         )
       ''');
       await db.execute('''
@@ -32,6 +33,11 @@ Future<Database> _openDatabase() async {
             ON DELETE CASCADE
         )
       ''');
+    },
+    onUpgrade: (db, oldVersion, newVersion) async {
+      if (oldVersion < 2) {
+        await db.execute('ALTER TABLE products ADD COLUMN image BLOB');
+      }
     },
   );
 }

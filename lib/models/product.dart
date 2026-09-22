@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:product_app/data/app_database.dart';
 import 'package:product_app/data/sample_product.dart';
@@ -9,6 +10,7 @@ class Product {
   final double price;
   final String description;
   final IconData icon;
+  final Uint8List? image;
 
   const Product({
     required this.id,
@@ -16,6 +18,7 @@ class Product {
     required this.price,
     required this.description,
     required this.icon,
+    this.image,
   });
 
   factory Product.fromMap(Map<String, Object?> map) {
@@ -29,6 +32,7 @@ class Product {
         map['icon_code_point'] as int,
         fontFamily: 'MaterialIcons',
       ),
+      image: map['image'] as Uint8List?,
     );
   }
 
@@ -39,6 +43,7 @@ class Product {
       'price': price,
       'description': description,
       'icon_code_point': icon.codePoint,
+      'image': image,
     };
   }
 

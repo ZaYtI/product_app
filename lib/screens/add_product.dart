@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import 'package:product_app/models/product.dart';
@@ -28,7 +30,19 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
   IconData _selectedIcon = availableIcons.first;
+  Uint8List? _image;
   bool _isSaving = false;
+
+  Future<void> _pickImage() async {
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      imageQuality: 80,
+    );
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
+    setState(() => _image = bytes);
+  }
 
   @override
   void dispose() {
@@ -49,6 +63,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       price: double.parse(_priceController.text.replaceAll(',', '.')),
       description: _descriptionController.text.trim(),
       icon: _selectedIcon,
+      image: _image,
     );
 
     await context.read<CatalogProvider>().addProduct(product);
@@ -131,6 +146,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ),
                 );
               }).toList(),
+            ),
+            const SizedBox(height: 16),
+            if (_image != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.memory(_image!, height: 180, fit: BoxFit.cover),
+              ),
+              const SizedBox(height: 8),
+            ],
+            OutlinedButton.icon(
+              onPressed: _pickImage,
+              icon: const Icon(Icons.image_outlined),
+              label: Text(
+                _image == null ? 'Ajouter une image' : "Changer l'image",
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton(
