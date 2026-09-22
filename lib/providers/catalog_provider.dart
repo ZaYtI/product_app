@@ -37,6 +37,16 @@ class CatalogProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> addFavorites(Set<String> ids) async {
+    for (final id in ids) {
+      if (_favoriteIds.contains(id)) continue;
+      final product = _products.firstWhere((p) => p.id == id);
+      await product.addToFavorites();
+      _favoriteIds.add(id);
+    }
+    notifyListeners();
+  }
+
   Future<void> toggleFavorite(String id) async {
     final product = _products.firstWhere((p) => p.id == id);
 

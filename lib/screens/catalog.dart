@@ -31,6 +31,7 @@ class CatalogScreen extends StatelessWidget implements HasFloatingActionButton {
       favoriteIds: catalog.favoriteIds,
       onToggleFavorite: catalog.toggleFavorite,
       onDeleteSelected: catalog.removeProducts,
+      onAddSelectedToFavorites: catalog.addFavorites,
     );
   }
 }

@@ -10,6 +10,7 @@ class ProductListSection extends StatefulWidget {
   final Set<String> favoriteIds;
   final void Function(String id) onToggleFavorite;
   final Future<void> Function(Set<String> ids)? onDeleteSelected;
+  final Future<void> Function(Set<String> ids)? onAddSelectedToFavorites;
   final Widget? emptyState;
 
   const ProductListSection({
@@ -21,6 +22,7 @@ class ProductListSection extends StatefulWidget {
     required this.favoriteIds,
     required this.onToggleFavorite,
     this.onDeleteSelected,
+    this.onAddSelectedToFavorites,
     this.emptyState,
   });
 
@@ -80,6 +82,17 @@ class _ProductListSectionState extends State<ProductListSection> {
     }
   }
 
+  Future<void> _addSelectedToFavorites() async {
+    await widget.onAddSelectedToFavorites?.call(selectedIds);
+    setState(() {
+      isSelectionMode = false;
+      selectedIds = {};
+    });
+  }
+
+  bool get _canSelect =>
+      widget.canDelete || widget.onAddSelectedToFavorites != null;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -100,14 +113,14 @@ class _ProductListSectionState extends State<ProductListSection> {
                       ),
                     ),
                   ),
-                  if (widget.canDelete)
+                  if (_canSelect)
                     TextButton.icon(
                       onPressed: _toggleSelectionMode,
                       icon: Icon(
-                        isSelectionMode ? Icons.close : Icons.delete_outline,
+                        isSelectionMode ? Icons.close : Icons.checklist,
                         size: 18,
                       ),
-                      label: Text(isSelectionMode ? 'Annuler' : 'Supprimer'),
+                      label: Text(isSelectionMode ? 'Annuler' : 'Sélectionner'),
                     ),
                 ],
               ),
@@ -169,14 +182,31 @@ class _ProductListSectionState extends State<ProductListSection> {
         if (isSelectionMode && selectedIds.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: _confirmDelete,
-                style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                icon: const Icon(Icons.delete),
-                label: Text('Supprimer (${selectedIds.length})'),
-              ),
+            child: Row(
+              children: [
+                if (widget.onAddSelectedToFavorites != null)
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _addSelectedToFavorites,
+                      icon: const Icon(Icons.favorite),
+                      label: Text('Ajouter (${selectedIds.length})'),
+                    ),
+                  ),
+                if (widget.onAddSelectedToFavorites != null &&
+                    widget.onDeleteSelected != null)
+                  const SizedBox(width: 12),
+                if (widget.onDeleteSelected != null)
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _confirmDelete,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      icon: const Icon(Icons.delete),
+                      label: Text('Supprimer (${selectedIds.length})'),
+                    ),
+                  ),
+              ],
             ),
           ),
       ],
