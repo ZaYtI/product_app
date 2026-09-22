@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:product_app/screens/catalog.dart';
 import 'package:product_app/screens/favorite.dart';
-import 'package:product_app/widgets/app_bar.dart';
 import 'package:product_app/utils/has_fab.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +15,6 @@ class AppRoot extends StatefulWidget {
 class _AppRootState extends State<AppRoot> {
   int currentIndex = 0;
 
-  static const titles = ['Mon mini-catalogue', 'Mes favoris'];
   static const screens = [CatalogScreen(), FavoritesScreen()];
 
   @override
@@ -31,21 +29,28 @@ class _AppRootState extends State<AppRoot> {
     final fabScreen = screen is HasFloatingActionButton
         ? screen as HasFloatingActionButton
         : null;
+    final favoriteCount = catalog.favoriteIds.length;
 
     return Scaffold(
-      appBar: CustomAppBar(title: titles[currentIndex]),
-      body: screen,
+      body: SafeArea(child: screen),
       floatingActionButton: fabScreen?.buildFloatingActionButton(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
         onDestinationSelected: (i) => setState(() => currentIndex = i),
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.grid_view),
             label: 'Catalogue',
           ),
-          NavigationDestination(icon: Icon(Icons.favorite), label: 'Favoris'),
+          NavigationDestination(
+            icon: Badge(
+              label: Text('$favoriteCount'),
+              isLabelVisible: favoriteCount > 0,
+              child: const Icon(Icons.favorite),
+            ),
+            label: 'Favoris',
+          ),
         ],
       ),
     );
