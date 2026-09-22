@@ -5,18 +5,22 @@ import 'package:product_app/widgets/product_card.dart';
 class ProductListSection extends StatefulWidget {
   final String title;
   final String subtitle;
+  final bool canDelete;
   final List<Product> products;
   final Set<String> favoriteIds;
   final void Function(String id) onToggleFavorite;
+  final Future<void> Function(Set<String> ids)? onDeleteSelected;
   final Widget? emptyState;
 
   const ProductListSection({
     super.key,
     required this.title,
     required this.subtitle,
+    this.canDelete = false,
     required this.products,
     required this.favoriteIds,
     required this.onToggleFavorite,
+    this.onDeleteSelected,
     this.emptyState,
   });
 
@@ -26,6 +30,55 @@ class ProductListSection extends StatefulWidget {
 
 class _ProductListSectionState extends State<ProductListSection> {
   bool isCompact = false;
+  bool isSelectionMode = false;
+  Set<String> selectedIds = {};
+
+  void _toggleSelectionMode() {
+    setState(() {
+      isSelectionMode = !isSelectionMode;
+      selectedIds = {};
+    });
+  }
+
+  void _toggleSelected(String id) {
+    setState(() {
+      if (selectedIds.contains(id)) {
+        selectedIds.remove(id);
+      } else {
+        selectedIds.add(id);
+      }
+    });
+  }
+
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer les produits'),
+        content: Text(
+          'Voulez-vous vraiment supprimer ${selectedIds.length} produit(s) ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await widget.onDeleteSelected?.call(selectedIds);
+      setState(() {
+        isSelectionMode = false;
+        selectedIds = {};
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +89,27 @@ class _ProductListSectionState extends State<ProductListSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.title,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  if (widget.canDelete)
+                    TextButton.icon(
+                      onPressed: _toggleSelectionMode,
+                      icon: Icon(
+                        isSelectionMode ? Icons.close : Icons.delete_outline,
+                        size: 18,
+                      ),
+                      label: Text(isSelectionMode ? 'Annuler' : 'Supprimer'),
+                    ),
+                ],
               ),
               const SizedBox(height: 4),
               Text(
@@ -90,11 +158,27 @@ class _ProductListSectionState extends State<ProductListSection> {
                         isFavorite: widget.favoriteIds.contains(product.id),
                         onToggleFavorite: () =>
                             widget.onToggleFavorite(product.id),
+                        isSelectionMode: isSelectionMode,
+                        isSelected: selectedIds.contains(product.id),
+                        onTap: () => _toggleSelected(product.id),
                       ),
                     );
                   },
                 ),
         ),
+        if (isSelectionMode && selectedIds.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _confirmDelete,
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                icon: const Icon(Icons.delete),
+                label: Text('Supprimer (${selectedIds.length})'),
+              ),
+            ),
+          ),
       ],
     );
   }

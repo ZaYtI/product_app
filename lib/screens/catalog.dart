@@ -14,9 +14,11 @@ class CatalogScreen extends StatelessWidget {
     return ProductListSection(
       title: 'Les produits',
       subtitle: '${catalog.products.length} produits à découvrir',
+      canDelete: true,
       products: catalog.products,
       favoriteIds: catalog.favoriteIds,
       onToggleFavorite: catalog.toggleFavorite,
+      onDeleteSelected: catalog.removeProducts,
     );
   }
 }

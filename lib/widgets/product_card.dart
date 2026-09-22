@@ -6,6 +6,9 @@ class ProductCard extends StatelessWidget {
   final bool isFavorite;
   final bool isCompact;
   final VoidCallback onToggleFavorite;
+  final bool isSelectionMode;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   const ProductCard({
     super.key,
@@ -13,6 +16,9 @@ class ProductCard extends StatelessWidget {
     required this.isFavorite,
     required this.isCompact,
     required this.onToggleFavorite,
+    this.isSelectionMode = false,
+    this.isSelected = false,
+    this.onTap,
   });
 
   @override
@@ -20,54 +26,73 @@ class ProductCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(
+          color: isSelected ? Colors.indigo : Colors.grey.shade200,
+          width: isSelected ? 2 : 1,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.indigo.shade50,
-                    borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: isSelectionMode ? onTap : null,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  if (isSelectionMode) ...[
+                    Icon(
+                      isSelected
+                          ? Icons.check_circle
+                          : Icons.circle_outlined,
+                      color: isSelected ? Colors.indigo : Colors.grey,
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.indigo.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(product.icon, color: Colors.indigo),
                   ),
-                  child: Icon(product.icon, color: Colors.indigo),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    product.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      product.name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
+                  Text('${product.price.toStringAsFixed(2)} €'),
+                ],
+              ),
+              if (!isCompact) ...[
+                const SizedBox(height: 8),
+                Text(
+                  product.description,
+                  style: TextStyle(color: Colors.grey.shade600),
                 ),
-                Text('${product.price.toStringAsFixed(2)} €'),
               ],
-            ),
-            if (!isCompact) ...[
-              const SizedBox(height: 8),
-              Text(
-                product.description,
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
+              if (!isSelectionMode)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: onToggleFavorite,
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      size: 18,
+                    ),
+                    label: Text(
+                      isFavorite
+                          ? 'Retirer des favoris'
+                          : 'Ajouter aux favoris',
+                    ),
+                  ),
+                ),
             ],
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: onToggleFavorite,
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  size: 18,
-                ),
-                label: Text(
-                  isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

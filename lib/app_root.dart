@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:product_app/screens/add_product.dart';
 import 'package:product_app/screens/catalog.dart';
 import 'package:product_app/screens/favorite.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +20,13 @@ class _AppRootState extends State<AppRoot> {
 
   @override
   Widget build(BuildContext context) {
-    final favoriteCount = context.watch<CatalogProvider>().favoriteIds.length;
+    final catalog = context.watch<CatalogProvider>();
+
+    if (catalog.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final favoriteCount = catalog.favoriteIds.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -38,6 +45,17 @@ class _AppRootState extends State<AppRoot> {
         ],
       ),
       body: screens[currentIndex],
+      floatingActionButton: currentIndex == 0
+          ? FloatingActionButton(
+              shape: const CircleBorder(),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AddProductScreen()),
+              ),
+              child: const Icon(Icons.add),
+            )
+          : null,
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
         onDestinationSelected: (i) => setState(() => currentIndex = i),

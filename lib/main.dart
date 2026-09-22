@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => CatalogProvider(),
+      create: (_) => CatalogProvider()..load(),
       child: MaterialApp(
         title: 'Mon mini-catalogue',
         theme: ThemeData(
